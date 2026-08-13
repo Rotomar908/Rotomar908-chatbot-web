@@ -233,7 +233,7 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      max_tokens: 120,
+      max_tokens: 400,
       temperature: 0.3,
       messages: [
         { role: "system", content: systemPrompt },
