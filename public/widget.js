@@ -5,7 +5,7 @@
 (function () {
   // ⚠️ IMPORTANTE: cambia esta URL por la de tu backend ya desplegado (ej. Render, Railway, etc.)
   // Ejemplo: "https://mi-chatbot.onrender.com"
-  const BASE_URL = "http://localhost:3000";
+  const BASE_URL = "https://rotomar908-chatbot-web.onrender.com";
   const API_URL = `${BASE_URL}/api/chat`;
   const FINALIZAR_URL = `${BASE_URL}/api/finalizar-conversacion`;
 
