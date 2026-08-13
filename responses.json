@@ -1,0 +1,30 @@
+{
+  "_comentario": "Cada entrada tiene 'keywords' (palabras clave que activan la respuesta) y 'respuesta' (texto fijo). Puedes añadir tantas como quieras.",
+  "faqs": [
+    {
+      "id": "horario",
+      "keywords": ["horario", "hora", "abren", "cierran", "atienden"],
+      "respuesta": "Nuestro horario de atención es de lunes a viernes de 9:00 a 18:00 (hora local)."
+    },
+    {
+      "id": "envios",
+      "keywords": ["envio", "envío", "entrega", "tarda", "llegada", "shipping"],
+      "respuesta": "Los envíos tardan entre 2 y 5 días hábiles según tu ubicación."
+    },
+    {
+      "id": "precios",
+      "keywords": ["precio", "cuesta", "coste", "costo", "tarifa", "planes"],
+      "respuesta": "Puedes ver todos nuestros precios y planes en la sección 'Precios' de la web."
+    },
+    {
+      "id": "contacto_humano",
+      "keywords": ["hablar con una persona", "agente", "humano", "soporte real", "operador"],
+      "respuesta": "Claro, te paso con un agente humano. Escríbenos a soporte@tuempresa.com o usa el botón 'Hablar con soporte'."
+    },
+    {
+      "id": "saludo",
+      "keywords": ["hola", "buenas", "hey", "qué tal"],
+      "respuesta": "¡Hola! 👋 Soy el asistente virtual. Puedo ayudarte con horarios, envíos, precios o dudas generales. ¿En qué te ayudo?"
+    }
+  ]
+}
