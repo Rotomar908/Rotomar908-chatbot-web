@@ -365,4 +365,67 @@ app.get("/panel/conversaciones/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
 });
+ // Envía texto al navegador. Si añades &descargar=1 a la URL, lo descarga como archivo .txt en vez de mostrarlo en pantalla.
+function enviarTexto(req, res, texto, nombreArchivo) {
+  if (req.query.descargar === "1") {
+    res.setHeader("Content-Disposition", `attachment; filename="${nombreArchivo}"`);
+  }
+  res.type("text/plain; charset=utf-8").send(texto);
+}
+ 
+// Ver (o descargar con &descargar=1) el resumen de leads (nombre, email, teléfono, interés)
+app.get("/panel/leads", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const texto = fs.existsSync(ARCHIVO_DATOS_UTILES)
+    ? fs.readFileSync(ARCHIVO_DATOS_UTILES, "utf-8")
+    : "Todavía no hay leads guardados.";
+  enviarTexto(req, res, texto, "leads.txt");
+});
+ 
+// Ver la lista de conversaciones disponibles (con enlaces para ver o descargar cada una)
+app.get("/panel/conversaciones", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const archivos = fs.existsSync(CONVERSACIONES_DIR) ? fs.readdirSync(CONVERSACIONES_DIR) : [];
+  if (archivos.length === 0) {
+    return res.type("text/plain").send("Todavía no hay conversaciones guardadas.");
+  }
+  const lista = archivos
+    .map((a) => {
+      const id = a.replace(/^conversacion_/, "").replace(/\.txt$/, "");
+      return `Ver:      /panel/conversaciones/${id}?clave=${CLAVE_PANEL}\nDescargar: /panel/conversaciones/${id}?clave=${CLAVE_PANEL}&descargar=1\n`;
+    })
+    .join("\n");
+  const descargarTodas = `/panel/conversaciones/descargar-todas?clave=${CLAVE_PANEL}`;
+  res.type("text/plain").send(
+    `Conversaciones disponibles:\n\n${lista}\nDescargar TODAS juntas en un archivo: ${descargarTodas}`
+  );
+});
+ 
+// Descargar TODAS las conversaciones juntas en un único archivo .txt
+app.get("/panel/conversaciones/descargar-todas", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const archivos = fs.existsSync(CONVERSACIONES_DIR) ? fs.readdirSync(CONVERSACIONES_DIR) : [];
+  if (archivos.length === 0) {
+    return res.type("text/plain").send("Todavía no hay conversaciones guardadas.");
+  }
+  const contenido = archivos
+    .map((a) => fs.readFileSync(path.join(CONVERSACIONES_DIR, a), "utf-8"))
+    .join("\n\n" + "=".repeat(50) + "\n\n");
+  res.setHeader("Content-Disposition", `attachment; filename="todas_las_conversaciones.txt"`);
+  res.type("text/plain; charset=utf-8").send(contenido);
+});
+ 
+// Ver o descargar una conversación concreta
+app.get("/panel/conversaciones/:id", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const archivo = rutaArchivoConversacion(req.params.id);
+  if (!fs.existsSync(archivo)) {
+    return res.status(404).type("text/plain").send("No existe esa conversación.");
+  }
+  enviarTexto(req, res, fs.readFileSync(archivo, "utf-8"), `${req.params.id}.txt`);
+});
+ 
+app.listen(PORT, () => {
+  console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
+});
  
