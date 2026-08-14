@@ -1,49 +1,49 @@
 // server.js
 // Backend del chatbot: combina respuestas predefinidas (rápidas y gratis)
 // con una llamada a la API de Groq (gratuita) para todo lo que no esté programado.
-
+ 
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const cors = require("cors");
 require("dotenv").config();
-
+ 
 const app = express();
-
+ 
 // Permite que tu web (en otro dominio) llame a este backend.
 // Pon aquí tu dominio real para más seguridad, ej: origin: "https://tudominio.com"
 app.use(cors());
-
+ 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
-
+ 
 const PORT = process.env.PORT || 3000;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-
+ 
 // --- Carpeta y archivos donde se guarda todo ---
 const LOGS_DIR = path.join(__dirname, "logs");
 const CONVERSACIONES_DIR = path.join(LOGS_DIR, "conversaciones");
 const ARCHIVO_DATOS_UTILES = path.join(LOGS_DIR, "datos_utiles.txt");
-
+ 
 if (!fs.existsSync(CONVERSACIONES_DIR)) {
   fs.mkdirSync(CONVERSACIONES_DIR, { recursive: true });
 }
-
+ 
 function fechaHoraActual() {
   return new Date().toLocaleString("es-ES", { timeZone: "Europe/Madrid" });
 }
-
+ 
 // Cada sesión (cada visitante) tiene su propio archivo .txt con la conversación completa
 function rutaArchivoConversacion(sesionId) {
   const idSeguro = sesionId.replace(/[^a-zA-Z0-9_-]/g, ""); // evita caracteres raros en el nombre de archivo
   return path.join(CONVERSACIONES_DIR, `conversacion_${idSeguro}.txt`);
 }
-
+ 
 // Guarda cada mensaje (usuario y bot) en el archivo de ESA sesión
 function guardarConversacion(sesionId, quien, texto, origen = "") {
   const archivo = rutaArchivoConversacion(sesionId);
-
+ 
   // Si el archivo es nuevo, le ponemos una cabecera con la fecha de inicio
   if (!fs.existsSync(archivo)) {
     fs.writeFileSync(
@@ -52,11 +52,11 @@ function guardarConversacion(sesionId, quien, texto, origen = "") {
       "utf-8"
     );
   }
-
+ 
   const linea = `[${fechaHoraActual()}] ${quien}${origen ? ` (${origen})` : ""}: ${texto}\n`;
   fs.appendFileSync(archivo, linea, "utf-8");
 }
-
+ 
 // Palabras clave que indican interés o necesidad real (ajusta esta lista a tu negocio)
 const PALABRAS_CLAVE_INTERES = [
   "quiero",
@@ -77,32 +77,32 @@ const PALABRAS_CLAVE_INTERES = [
   "agendar",
   "cita",
 ];
-
+ 
 // Detecta email, teléfono, nombre e intereses en el texto del usuario
 function extraerDatosUtiles(texto) {
   const regexEmail = /[\w.+-]+@[\w-]+\.[\w.-]+/g;
   const regexTelefono = /(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g;
   const regexNombre = /(?:me llamo|mi nombre es|soy)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+){0,2})/i;
-
+ 
   const emails = texto.match(regexEmail) || [];
   const telefonosCrudos = texto.match(regexTelefono) || [];
   const telefonos = telefonosCrudos.filter((t) => t.replace(/\D/g, "").length >= 7);
-
+ 
   const matchNombre = texto.match(regexNombre);
   const nombre = matchNombre ? matchNombre[1].trim() : null;
-
+ 
   const textoNorm = texto.toLowerCase();
   const intereses = PALABRAS_CLAVE_INTERES.filter((kw) => textoNorm.includes(kw));
-
+ 
   return { emails, telefonos, nombre, intereses };
 }
-
+ 
 // Si el mensaje trae algún dato útil (contacto, nombre o interés), lo guarda aparte
 function guardarDatosUtilesSiExiste(sesionId, mensajeUsuario) {
   const { emails, telefonos, nombre, intereses } = extraerDatosUtiles(mensajeUsuario);
   const hayAlgoUtil = emails.length || telefonos.length || nombre || intereses.length;
   if (!hayAlgoUtil) return;
-
+ 
   const partes = [
     `[${fechaHoraActual()}]`,
     `[sesion:${sesionId}]`,
@@ -114,13 +114,13 @@ function guardarDatosUtilesSiExiste(sesionId, mensajeUsuario) {
   ];
   fs.appendFileSync(ARCHIVO_DATOS_UTILES, partes.join(" | ") + "\n", "utf-8");
 }
-
+ 
 // Cargamos las respuestas predefinidas desde el JSON
 function cargarFAQs() {
   const raw = fs.readFileSync(path.join(__dirname, "responses.json"), "utf-8");
   return JSON.parse(raw).faqs;
 }
-
+ 
 // Normaliza texto (minúsculas, sin tildes) para comparar mejor
 function normalizar(texto) {
   return texto
@@ -128,12 +128,12 @@ function normalizar(texto) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 }
-
+ 
 // Busca si el mensaje del usuario coincide con alguna keyword programada
 function buscarRespuestaProgramada(mensajeUsuario) {
   const faqs = cargarFAQs();
   const mensajeNorm = normalizar(mensajeUsuario);
-
+ 
   for (const faq of faqs) {
     for (const kw of faq.keywords) {
       if (mensajeNorm.includes(normalizar(kw))) {
@@ -143,7 +143,7 @@ function buscarRespuestaProgramada(mensajeUsuario) {
   }
   return null; // no hay coincidencia -> se usará la API
 }
-
+ 
 // Llamada a la API de Groq (gratuita) para preguntas no programadas
 // Groq usa el mismo formato que OpenAI, solo cambia la URL y el modelo.
 async function preguntarAGroq(mensajeUsuario, historial = []) {
@@ -222,9 +222,10 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
 *   **Reparaciones y Mantenimiento:** Reparaciones homologadas de golpes, lonas, toldos, sistemas hidráulicos o estructuras metálicas para prolongar la vida útil de cualquier carrocería industrial.
 *   **Homologaciones Oficiales:** Nos encargamos de tramitar toda la documentación y proyectos de reforma técnica necesarios para que el vehículo pase la ITV sin problemas.
 *   **No hacemos envios de piezas no queremos darnos a conocer de que vendemos piezas simplemente ofrecemos servicios y vendemos camiones
+*   **Quiero que le comentes a los clientes que sus datos no sera compartidos publicamente y que solo serviran para que nuiestros agentess puedan identificarles.
 ---
 ---`;
-
+ 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -242,41 +243,41 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
       ],
     }),
   });
-
+ 
   if (!response.ok) {
     const errText = await response.text();
     throw new Error(`Error de la API de Groq: ${response.status} - ${errText}`);
   }
-
+ 
   const data = await response.json();
   return (
     data.choices?.[0]?.message?.content ||
     "Lo siento, no he podido generar una respuesta."
   );
 }
-
+ 
 // Endpoint principal del chat
 app.post("/api/chat", async (req, res) => {
   try {
     const { mensaje, historial, sesionId } = req.body;
-
+ 
     if (!mensaje || typeof mensaje !== "string") {
       return res.status(400).json({ error: "Falta el campo 'mensaje'." });
     }
-
+ 
     const idSesion = sesionId || "sin-id";
-
+ 
     // Guardamos el mensaje del usuario y revisamos si trae datos útiles
     guardarConversacion(idSesion, "Usuario", mensaje);
     guardarDatosUtilesSiExiste(idSesion, mensaje);
-
+ 
     // 1) Intentamos responder con las reglas programadas (rápido, sin coste de API)
     const respuestaProgramada = buscarRespuestaProgramada(mensaje);
     if (respuestaProgramada) {
       guardarConversacion(idSesion, "Bot", respuestaProgramada, "programada");
       return res.json({ respuesta: respuestaProgramada, origen: "programada" });
     }
-
+ 
     // 2) Si no hay coincidencia, usamos la API de Groq (gratuita) como respaldo
     if (!GROQ_API_KEY) {
       const msj =
@@ -284,7 +285,7 @@ app.post("/api/chat", async (req, res) => {
       guardarConversacion(idSesion, "Bot", msj, "sin_api");
       return res.status(200).json({ respuesta: msj, origen: "sin_api" });
     }
-
+ 
     const respuestaIA = await preguntarAGroq(mensaje, historial || []);
     guardarConversacion(idSesion, "Bot", respuestaIA, "ia");
     return res.json({ respuesta: respuestaIA, origen: "ia" });
@@ -293,13 +294,13 @@ app.post("/api/chat", async (req, res) => {
     return res.status(500).json({ error: "Error interno del servidor." });
   }
 });
-
+ 
 // Endpoint para marcar que una conversación ha terminado (se llama cuando el cliente cierra el chat)
 app.post("/api/finalizar-conversacion", (req, res) => {
   try {
     const { sesionId } = req.body;
     if (!sesionId) return res.status(400).json({ error: "Falta 'sesionId'." });
-
+ 
     const archivo = rutaArchivoConversacion(sesionId);
     if (fs.existsSync(archivo)) {
       fs.appendFileSync(
@@ -314,10 +315,10 @@ app.post("/api/finalizar-conversacion", (req, res) => {
     return res.status(500).json({ error: "Error interno del servidor." });
   }
 });
-
+ 
 // Contraseña simple para ver tus datos desde el navegador (cámbiala en las variables de entorno de Render)
 const CLAVE_PANEL = process.env.CLAVE_PANEL || "cambia-esta-clave";
-
+ 
 function comprobarClave(req, res) {
   if (req.query.clave !== CLAVE_PANEL) {
     res.status(401).send("Clave incorrecta. Añade ?clave=TU_CLAVE al final de la URL.");
@@ -325,7 +326,7 @@ function comprobarClave(req, res) {
   }
   return true;
 }
-
+ 
 // Ver el resumen de leads (nombre, email, teléfono, interés) desde el navegador
 app.get("/panel/leads", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -334,7 +335,7 @@ app.get("/panel/leads", (req, res) => {
   }
   res.type("text/plain").send(fs.readFileSync(ARCHIVO_DATOS_UTILES, "utf-8"));
 });
-
+ 
 // Ver la lista de conversaciones disponibles
 app.get("/panel/conversaciones", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -343,11 +344,14 @@ app.get("/panel/conversaciones", (req, res) => {
     return res.type("text/plain").send("Todavía no hay conversaciones guardadas.");
   }
   const lista = archivos
-    .map((a) => `/panel/conversaciones/${a.replace(".txt", "")}?clave=${CLAVE_PANEL}`)
+    .map((a) => {
+      const idSinPrefijoNiExtension = a.replace(/^conversacion_/, "").replace(/\.txt$/, "");
+      return `/panel/conversaciones/${idSinPrefijoNiExtension}?clave=${CLAVE_PANEL}`;
+    })
     .join("\n");
   res.type("text/plain").send(`Conversaciones disponibles:\n\n${lista}`);
 });
-
+ 
 // Ver una conversación concreta
 app.get("/panel/conversaciones/:id", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -357,7 +361,8 @@ app.get("/panel/conversaciones/:id", (req, res) => {
   }
   res.type("text/plain").send(fs.readFileSync(archivo, "utf-8"));
 });
-
+ 
 app.listen(PORT, () => {
   console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
 });
+ 
