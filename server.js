@@ -234,7 +234,7 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      max_tokens: 120,
+      max_tokens: 300,
       temperature: 0.3, // más bajo = respuestas más controladas y predecibles (0 a 2). Sube si la ves demasiado robótica.
       messages: [
         { role: "system", content: systemPrompt },
