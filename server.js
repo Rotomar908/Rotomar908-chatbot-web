@@ -233,8 +233,8 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      max_tokens: 400,
-      temperature: 0.3,
+      max_tokens: 120,
+      temperature: 0.3, // más bajo = respuestas más controladas y predecibles (0 a 2). Sube si la ves demasiado robótica.
       messages: [
         { role: "system", content: systemPrompt },
         ...historial,
@@ -315,12 +315,9 @@ app.post("/api/finalizar-conversacion", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
-});
 // Contraseña simple para ver tus datos desde el navegador (cámbiala en las variables de entorno de Render)
-const CLAVE_PANEL = process.env.CLAVE_PANEL || "Rotomar0601";
- 
+const CLAVE_PANEL = process.env.CLAVE_PANEL || "cambia-esta-clave";
+
 function comprobarClave(req, res) {
   if (req.query.clave !== CLAVE_PANEL) {
     res.status(401).send("Clave incorrecta. Añade ?clave=TU_CLAVE al final de la URL.");
@@ -328,7 +325,7 @@ function comprobarClave(req, res) {
   }
   return true;
 }
- 
+
 // Ver el resumen de leads (nombre, email, teléfono, interés) desde el navegador
 app.get("/panel/leads", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -337,7 +334,7 @@ app.get("/panel/leads", (req, res) => {
   }
   res.type("text/plain").send(fs.readFileSync(ARCHIVO_DATOS_UTILES, "utf-8"));
 });
- 
+
 // Ver la lista de conversaciones disponibles
 app.get("/panel/conversaciones", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -350,7 +347,7 @@ app.get("/panel/conversaciones", (req, res) => {
     .join("\n");
   res.type("text/plain").send(`Conversaciones disponibles:\n\n${lista}`);
 });
- 
+
 // Ver una conversación concreta
 app.get("/panel/conversaciones/:id", (req, res) => {
   if (!comprobarClave(req, res)) return;
@@ -360,7 +357,7 @@ app.get("/panel/conversaciones/:id", (req, res) => {
   }
   res.type("text/plain").send(fs.readFileSync(archivo, "utf-8"));
 });
- 
+
 app.listen(PORT, () => {
   console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
 });
