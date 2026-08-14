@@ -221,7 +221,7 @@ Usa esta lista para confirmar si realizamos un trabajo y explicarlo de manera se
 *   **Suspensión Neumática:** Expertos en la instalación de suspensiones neumáticas homologadas para camiones, furgonetas, autocaravanas y campers. Mejoran la estabilidad, reducen el balanceo por viento y optimizan la conducción bajo carga.
 *   **Reparaciones y Mantenimiento:** Reparaciones homologadas de golpes, lonas, toldos, sistemas hidráulicos o estructuras metálicas para prolongar la vida útil de cualquier carrocería industrial.
 *   **Homologaciones Oficiales:** Nos encargamos de tramitar toda la documentación y proyectos de reforma técnica necesarios para que el vehículo pase la ITV sin problemas.
-
+*   **No hacemos envios de piezas no queremos darnos a conocer de que vendemos piezas simplemente ofrecemos servicios y vendemos camiones
 ---
 ---`;
 
