@@ -318,3 +318,49 @@ app.post("/api/finalizar-conversacion", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
 });
+// Contraseña simple para ver tus datos desde el navegador (cámbiala en las variables de entorno de Render)
+const CLAVE_PANEL = process.env.CLAVE_PANEL || "Rotomar0601";
+ 
+function comprobarClave(req, res) {
+  if (req.query.clave !== CLAVE_PANEL) {
+    res.status(401).send("Clave incorrecta. Añade ?clave=TU_CLAVE al final de la URL.");
+    return false;
+  }
+  return true;
+}
+ 
+// Ver el resumen de leads (nombre, email, teléfono, interés) desde el navegador
+app.get("/panel/leads", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  if (!fs.existsSync(ARCHIVO_DATOS_UTILES)) {
+    return res.type("text/plain").send("Todavía no hay leads guardados.");
+  }
+  res.type("text/plain").send(fs.readFileSync(ARCHIVO_DATOS_UTILES, "utf-8"));
+});
+ 
+// Ver la lista de conversaciones disponibles
+app.get("/panel/conversaciones", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const archivos = fs.existsSync(CONVERSACIONES_DIR) ? fs.readdirSync(CONVERSACIONES_DIR) : [];
+  if (archivos.length === 0) {
+    return res.type("text/plain").send("Todavía no hay conversaciones guardadas.");
+  }
+  const lista = archivos
+    .map((a) => `/panel/conversaciones/${a.replace(".txt", "")}?clave=${CLAVE_PANEL}`)
+    .join("\n");
+  res.type("text/plain").send(`Conversaciones disponibles:\n\n${lista}`);
+});
+ 
+// Ver una conversación concreta
+app.get("/panel/conversaciones/:id", (req, res) => {
+  if (!comprobarClave(req, res)) return;
+  const archivo = rutaArchivoConversacion(req.params.id);
+  if (!fs.existsSync(archivo)) {
+    return res.status(404).type("text/plain").send("No existe esa conversación.");
+  }
+  res.type("text/plain").send(fs.readFileSync(archivo, "utf-8"));
+});
+ 
+app.listen(PORT, () => {
+  console.log(`Servidor del chatbot escuchando en http://localhost:${PORT}`);
+});

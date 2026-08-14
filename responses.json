@@ -4,22 +4,17 @@
     {
       "id": "horario",
       "keywords": ["horario", "hora", "abren", "cierran", "atienden"],
-      "respuesta": "Nuestro horario de atención es de lunes a viernes de 9:00 a 18:00 (hora local)."
-    },
-    {
-      "id": "envios",
-      "keywords": ["envio", "envío", "entrega", "tarda", "llegada", "shipping"],
-      "respuesta": "Los envíos tardan entre 2 y 5 días hábiles según tu ubicación."
+      "respuesta": "Nuestro horario es:\n- Lunes a jueves: 8:00 a 14:00 y 15:00 a 17:30\n- Viernes: 8:00 a 14:30\n\nEn horario de verano:\n- Lunes a viernes: 7:00 a 14:30"
     },
     {
       "id": "precios",
       "keywords": ["precio", "cuesta", "coste", "costo", "tarifa", "planes"],
-      "respuesta": "Puedes ver todos nuestros precios y planes en la sección 'Precios' de la web."
+      "respuesta": "Nuestros precios varian depende de lo que usted pida. Nuestro agente le ofrecera un  precio a base de lo que usted desea."
     },
     {
       "id": "contacto_humano",
       "keywords": ["hablar con una persona", "agente", "humano", "soporte real", "operador"],
-      "respuesta": "Claro, te paso con un agente humano. Escríbenos a soporte@tuempresa.com o usa el botón 'Hablar con soporte'."
+      "respuesta": "Claro, te paso con un agente humano. Escríbenos a info@rotomar.com o llamanos a nuestro numero de Whatsapp en el boton de arriba."
     },
     {
       "id": "saludo",
